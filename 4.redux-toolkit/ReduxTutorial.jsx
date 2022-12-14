@@ -1,49 +1,48 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-const { logIn, logOut } = require("./action/user");
+import React, { useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addPost } from "./action/post";
+import userSlice from "./reducers/user";
 
-class ReduxTutorial extends Component {
-  onClickLogin = () => {
-    this.props.dispatchLogIn({
-      id: "zerocho",
-      password: "pwd",
-    });
-  };
+const { logIn } = require("./action/user");
 
-  onClickLogout = () => {
-    this.props.dispatchLogOut();
-  };
+function ReduxTutorial() {
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
-  render() {
-    const { user } = this.props;
-    console.log(user?.data?.id);
-    return (
-      <div>
-        {user.isLoggingIn ? (
-          <div>로그인 중...</div>
-        ) : user.data ? (
-          <div>{user.data.id}</div>
-        ) : (
-          <div>로그인 해주세요!</div>
-        )}
-        {!user.data ? (
-          <button onClick={this.onClickLogin}>로그인</button>
-        ) : (
-          <button onClick={this.onClickLogout}>로그아웃</button>
-        )}
-      </div>
+  const onClickLogin = useCallback(() => {
+    dispatch(
+      logIn({
+        id: "zerocho",
+        password: "pwd",
+      })
     );
-  }
+  }, []);
+
+  const onClickLogout = useCallback(() => {
+    dispatch(userSlice.actions.logOut());
+  }, []);
+
+  const AddPost = useCallback(() => {
+    dispatch(addPost());
+  }, []);
+
+  return (
+    <div>
+      {user.isLoggingIn ? (
+        <div>로그인 중...</div>
+      ) : user.data ? (
+        <div>{user.data.nickname}</div>
+      ) : (
+        <div>로그인 해주세요!</div>
+      )}
+      {!user.data ? (
+        <button onClick={onClickLogin}>로그인</button>
+      ) : (
+        <button onClick={onClickLogout}>로그아웃</button>
+      )}
+      <button onClick={AddPost}>게시글 작성</button>
+    </div>
+  );
 }
 
-const mapStateToProps = (state) => ({
-  user: state.user,
-  posts: state.posts,
-}); // reselect
-
-const mapDispatchToProps = (dispatch) => ({
-  dispatchLogIn: (data) => dispatch(logIn(data)),
-  dispatchLogOut: () => dispatch(logOut()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ReduxTutorial);
+export default ReduxTutorial;

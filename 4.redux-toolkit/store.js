@@ -1,16 +1,6 @@
-const { createStore, compose, applyMiddleware } = require("redux");
-const { composeWithDevTools } = require("redux-devtools-extension");
-const reducer = require("./reducers");
-const { logIn, logOut } = require("./action/user");
-const { addPost } = require("./action/post");
+const { configureStore, getDefaultMiddleware } = require("@reduxjs/toolkit");
 
-const initialState = {
-  user: {
-    isLoggingIn: false,
-    data: null,
-  },
-  posts: [],
-};
+const reducer = require("./reducers");
 
 const firstMiddleware = (store) => (dispatch) => (action) => {
   console.log("로깅", action);
@@ -19,18 +9,11 @@ const firstMiddleware = (store) => (dispatch) => (action) => {
   // 기능 추가
 };
 
-const thunkMiddleware = (store) => (dispatch) => (action) => {
-  if (typeof action === "function") {
-    // 비동기
-    return action(store.dispatch, store.getState());
-  }
-  return dispatch(action);
-};
-
-const enhancer = composeWithDevTools(
-  applyMiddleware(firstMiddleware, thunkMiddleware)
-);
-
-const store = createStore(reducer, initialState, enhancer);
+const store = configureStore({
+  reducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(firstMiddleware),
+  devTools: true,
+});
 
 module.exports = store;
